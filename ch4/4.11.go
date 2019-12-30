@@ -12,8 +12,7 @@ import (
 
 func init() {
 	helper.TimeLocal, _ = time.LoadLocation("Asia/Shanghai")
-	dir, _ := os.Getwd()
-	helper.LogBasePath = dir + "/log"
+	helper.InitLog()
 }
 
 func main() {

@@ -5,15 +5,13 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"os"
 	"sidneyyi.com/helper"
 	"time"
 )
 
 func init() {
 	helper.TimeLocal, _ = time.LoadLocation("Asia/Shanghai")
-	dir, _ := os.Getwd()
-	helper.LogBasePath = dir + "/log"
+	helper.InitLog()
 }
 
 func main() {
