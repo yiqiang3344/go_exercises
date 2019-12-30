@@ -1,0 +1,71 @@
+package main
+
+import (
+	"fmt"
+	"html/template"
+	"log"
+	"net/http"
+	"sidneyyi.com/helper"
+	"time"
+)
+
+func init() {
+	helper.TimeLocal, _ = time.LoadLocation("Asia/Shanghai")
+}
+
+func main() {
+	http.HandleFunc("/search", search)
+	log.Fatal(http.ListenAndServe("go.sidney.yi:8000", nil))
+}
+
+func search(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	code := query.Get("code")
+	state := query.Get("state")
+	var err error
+	if code != "" {
+		helper.Token, err = helper.GetToken(w, r, code, state, "http://go.sidney.yi:8000/search")
+		if err != nil {
+			fmt.Fprintf(w, "%s", err)
+			return
+		}
+	}
+
+	helper.WriteLog("code:"+code+";state:"+state+";token:"+helper.Token, "gopl.io/ch4/4.14.go::search")
+
+	result, err := helper.GetIssues()
+	if err != nil {
+		fmt.Fprintf(w, "%s", err)
+		return
+	}
+	show(w, result)
+}
+
+func show(w http.ResponseWriter, list []helper.Issue) {
+	t := template.Must(template.New("issues").Parse(`<h1>{{.TotalCount}} issues</h1>
+<table>
+<tr style='text-align: left'>
+  <th>#</th>
+  <th>State</th>
+  <th>User</th>
+  <th>Title</th>
+</tr>
+{{range .Items}}
+<tr>
+  <td><a href='{{.HTMLURL}}'>{{.Number}}</a></td>
+  <td>{{.State}}</td>
+  <td><a href='{{.User.HTMLURL}}'>{{.User.Login}}</a></td>
+  <td><a href='{{.HTMLURL}}'>{{.Title}}</a></td>
+</tr>
+{{end}}
+</table>`))
+	var data struct {
+		TotalCount int
+		Items      []helper.Issue
+	}
+	data.TotalCount = len(list)
+	data.Items = list
+	if err := t.Execute(w, data); err != nil {
+		log.Fatal(err)
+	}
+}
