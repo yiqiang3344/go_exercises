@@ -5,33 +5,41 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"sidneyyi.com/helper"
 	"time"
 )
 
 func init() {
 	helper.TimeLocal, _ = time.LoadLocation("Asia/Shanghai")
+	dir, _ := os.Getwd()
+	helper.LogBasePath = dir + "/log"
 }
 
 func main() {
+	http.HandleFunc("/", home14)
 	http.HandleFunc("/search", search)
 	log.Fatal(http.ListenAndServe("go.sidney.yi:8000", nil))
+}
+
+func home14(w http.ResponseWriter, r *http.Request) {
+	helper.WriteLog(fmt.Sprintf("%#v", r.PostForm), "gopl.io/ch4/4.14.go::home14")
+	fmt.Fprintf(w, "done")
+	return
 }
 
 func search(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	code := query.Get("code")
-	state := query.Get("state")
+	helper.WriteLog("debug1 code:"+code+";token:"+helper.Token, "gopl.io/ch4/4.14.go::search")
 	var err error
-	if code != "" {
-		helper.Token, err = helper.GetToken(w, r, code, state, "http://go.sidney.yi:8000/search")
-		if err != nil {
-			fmt.Fprintf(w, "%s", err)
-			return
-		}
+	err = helper.GetToken(w, r, code, "", "http://go.sidney.yi:8000/search")
+	if err != nil {
+		fmt.Fprintf(w, "%s", err)
+		return
 	}
 
-	helper.WriteLog("code:"+code+";state:"+state+";token:"+helper.Token, "gopl.io/ch4/4.14.go::search")
+	helper.WriteLog("debug2 code:"+code+";token:"+helper.Token, "gopl.io/ch4/4.14.go::search")
 
 	result, err := helper.GetIssues()
 	if err != nil {

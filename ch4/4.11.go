@@ -12,6 +12,8 @@ import (
 
 func init() {
 	helper.TimeLocal, _ = time.LoadLocation("Asia/Shanghai")
+	dir, _ := os.Getwd()
+	helper.LogBasePath = dir + "/log"
 }
 
 func main() {
@@ -32,7 +34,7 @@ func tool(w http.ResponseWriter, r *http.Request) {
 	code := query.Get("code")
 	state := query.Get("state")
 	var err error
-	helper.Token, err = helper.GetToken(w, r, code, state, "")
+	err = helper.GetToken(w, r, code, state, "http://go.sidney.yi:8000/tool")
 	if err != nil {
 		fmt.Fprintf(w, "%s", err)
 		return
