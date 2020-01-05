@@ -3,6 +3,8 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+
 	//"io"
 	"strings"
 	//"io/ioutil"
@@ -12,7 +14,7 @@ import (
 
 func main() {
 	for _, url := range os.Args[1:] {
-		if !strings.HasPrefix(url,"https://") {
+		if !strings.HasPrefix(url, "https://") {
 			url = "https://" + url
 		}
 		resp, err := http.Get(url)
@@ -21,13 +23,13 @@ func main() {
 			os.Exit(1)
 		}
 		//out, err := io.Copy(os.Stdout, resp.Body);
-		//b, err := ioutil.ReadAll(resp.Body)
-		fmt.Printf("%s", resp.Status)
+		b, err := ioutil.ReadAll(resp.Body)
+		//fmt.Printf("%s", resp.Status)
 		resp.Body.Close()
-		//if err != nil {
-		//	fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", url, err)
-		//	os.Exit(1)
-		//}
-		//fmt.Printf("%s", out)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", url, err)
+			os.Exit(1)
+		}
+		fmt.Printf("%s", b)
 	}
 }

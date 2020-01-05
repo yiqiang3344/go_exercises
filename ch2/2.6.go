@@ -7,5 +7,5 @@ import (
 )
 
 func main() {
-	fmt.Println(tempconv.CToK(tempconv.BoilingC));
+	fmt.Println(tempconv.CToK(tempconv.BoilingC))
 }

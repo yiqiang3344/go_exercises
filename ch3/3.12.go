@@ -19,7 +19,7 @@ func compare(s string, s1 string) bool {
 	for k, v := range _map {
 		v1, ok := _map1[k]
 		if !ok || v1 != v {
-			return false;
+			return false
 		}
 	}
 	return true
